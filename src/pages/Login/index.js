@@ -2,10 +2,12 @@ import React, {useState} from 'react';
 import {SafeAreaView, View, Text} from 'react-native';
 import {TextInput, TouchableOpacity} from 'react-native-gesture-handler';
 import {gql} from 'apollo-boost';
-import {mutate} from '../../services/api';
+import {client, mutate} from '../../services/api';
 import {getData, setData} from '../../helper/localStorage';
+import {connect} from 'react-redux';
+import AUTH_ACTION from '../../stores/actions/auth';
 
-export default ({navigation}) => {
+const Login = ({navigation, setSign}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState('tomo@icube.us');
   const [password, setPassword] = useState('Admin123');
@@ -31,13 +33,29 @@ export default ({navigation}) => {
     mutate(schema, params)
       .then((res) => {
         const {data} = res;
-        let token = data.generateCustomerTokenCustom;
-        setData('userToken', token.token);
+        let user = data.generateCustomerTokenCustom;
+        console.log(user.token);
+        setData('userToken', user.token);
         setIsLoading(false);
+        let dataFormat = {
+          type: 'signin',
+          token: user.token,
+        };
+        setSign(dataFormat);
+        if (user.token !== null) {
+          navigation.navigate('ProfilePage');
+        }
       })
       .catch((err) => {
         setIsLoading(false);
+        console.log(err);
+        alert('username/password salah cuy');
       });
+  };
+
+  const cekToken = () => {
+    alert(JSON.stringify(getData('userToken')));
+    console.log(JSON.stringify(getData('userToken')));
   };
 
   return (
@@ -69,17 +87,52 @@ export default ({navigation}) => {
             marginBottom: 15,
           }}
           onPress={() => login()}
-          disabled={username && password ? false : true}>
+          disabled={(username && password) || !isLoading ? false : true}>
+          {isLoading ? (
+            <Text
+              style={{
+                textTransform: 'uppercase',
+                textAlign: 'center',
+                color: '#FFF',
+              }}>
+              Loading ...
+            </Text>
+          ) : (
+            <Text
+              style={{
+                textTransform: 'uppercase',
+                textAlign: 'center',
+                color: '#FFF',
+              }}>
+              Login
+            </Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#ff843d',
+            borderRadius: 6,
+            paddingHorizontal: 15,
+            paddingVertical: 10,
+            marginBottom: 15,
+          }}
+          onPress={() => cekToken()}>
           <Text
             style={{
               textTransform: 'uppercase',
               textAlign: 'center',
               color: '#FFF',
             }}>
-            Login
+            Cek Token
           </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  setSign: (data) => dispatch(AUTH_ACTION.set(data)),
+});
+
+export default connect(null, mapDispatchToProps)(Login);
