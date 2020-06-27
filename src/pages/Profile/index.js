@@ -1,132 +1,61 @@
-import React from 'react';
-import {Text, View} from 'react-native';
-import {TouchableOpacity, FlatList} from 'react-native-gesture-handler';
-import {getData, removeData} from '../../helper/localStorage';
+import React, {useState} from 'react';
 import {connect} from 'react-redux';
+const {View, Text, Button} = require('react-native');
 import AUTH_ACTION from '../../stores/actions/auth';
+import {query} from '../../services/api';
+import {getCustomerData} from '../../services/query';
 
-const DATA = [
-  {
-    id: '5eeda831fddf949cb744b151',
-    name: 'Guadalupe Marsh',
-    gender: 'female',
-  },
-  {
-    id: '5eeda83149e03319441d4811',
-    name: 'Tabatha Chavez',
-    gender: 'female',
-  },
-  {
-    id: '5eeda8317d466cb154848ea9',
-    name: 'Aguilar Fitzgerald',
-    gender: 'male',
-  },
-  {
-    id: '5eeda831a36fb87b1b3b8509',
-    name: 'Kate Barrera',
-    gender: 'female',
-  },
-  {
-    id: '5eeda831ff05c8becc42807e',
-    name: 'Wyatt Burt',
-    gender: 'male',
-  },
-  {
-    id: '5eeda8312638f90a59465814',
-    name: 'Hernandez Barnett',
-    gender: 'male',
-  },
-];
+const Profile = ({navigation, auth, setSign}) => {
+  const [user, setUser] = useState();
+  const [isLoading, setIsLoading] = useState(true);
 
-const Profile = ({navigation, setSign, auth}) => {
+  query(getCustomerData).then((res) => {
+    setUser(res.data.customer);
+    setIsLoading(false);
+  });
+
   const logout = () => {
     setSign(null);
   };
 
-  const Item = ({data}) => {
-    const user = data.item;
-    return (
-      <View style={{marginBottom: 5, flex: 1}}>
-        <Text>{user.name}</Text>
-        <Text>{user.gender}</Text>
-      </View>
-    );
-  };
-
-  const listDataUser = () => {
+  if (isLoading) {
     return (
       <View>
-        <Text
-          style={{
-            fontSize: 32,
-            marginBottom: 20,
-            paddingBottom: 20,
-            borderBottomColor: '#F0F0F0',
-            borderBottomWidth: 1,
-          }}>
-          List Data
-        </Text>
-        <FlatList
-          data={DATA}
-          renderItem={(item) => <Item data={item} />}
-          keyExtractor={(item) => item.id}
-        />
+        <Text>Loading .....</Text>
       </View>
     );
-  };
+  }
+
   return (
-    <>
-      <View
+    <View
+      style={{
+        padding: 20,
+        backgroundColor: '#FFF',
+        margin: 20,
+        marginBottom: 0,
+        borderRadius: 10,
+      }}>
+      <Text
         style={{
-          padding: 20,
-          backgroundColor: '#FFF',
-          margin: 20,
-          marginBottom: 0,
-          borderRadius: 10,
+          fontSize: 32,
+          marginBottom: 20,
+          paddingBottom: 20,
+          borderBottomColor: '#F0F0F0',
+          borderBottomWidth: 1,
         }}>
-        <Text
-          style={{
-            fontSize: 32,
-            marginBottom: 20,
-            paddingBottom: 20,
-            borderBottomColor: '#F0F0F0',
-            borderBottomWidth: 1,
-          }}>
-          My Profile
-        </Text>
-        <Text style={{fontSize: 12, color: '#C0C0C0'}}>
+        My Profile
+      </Text>
+      <View style={{marginBottom: 20}}>
+        <Text style={{fontSize: 12, color: '#C0C0C0', marginBottom: 10}}>
           Your Token: {auth.user.token}
         </Text>
-      </View>
-      <View
-        style={{
-          padding: 20,
-          backgroundColor: '#FFF',
-          margin: 20,
-          borderRadius: 10,
-        }}>
-        {listDataUser()}
-      </View>
-      <TouchableOpacity
-        style={{
-          backgroundColor: '#C0C0C0',
-          borderRadius: 6,
-          paddingHorizontal: 15,
-          paddingVertical: 10,
-          margin: 20,
-          marginTop: 0,
-        }}
-        onPress={() => logout()}>
-        <Text
-          style={{
-            textTransform: 'uppercase',
-            textAlign: 'center',
-            color: '#FFF',
-          }}>
-          Logout
+        <Text>
+          Name : {user.firstname} {user.lastname}
         </Text>
-      </TouchableOpacity>
-    </>
+        <Text>Email : {user.email}</Text>
+      </View>
+      <Button onPress={() => logout()} title="Logout" />
+    </View>
   );
 };
 

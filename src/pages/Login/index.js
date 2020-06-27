@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
-import {SafeAreaView, View, Text} from 'react-native';
+import {SafeAreaView, View, Text, Alert} from 'react-native';
 import {TextInput, TouchableOpacity} from 'react-native-gesture-handler';
-import {gql} from 'apollo-boost';
-import {client, mutate} from '../../services/api';
+import {mutate} from '../../services/api';
 import {getData, setData} from '../../helper/localStorage';
 import {connect} from 'react-redux';
 import AUTH_ACTION from '../../stores/actions/auth';
+import {getCustomerToken} from '../../services/query';
 
 const Login = ({navigation, setSign}) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,48 +14,33 @@ const Login = ({navigation, setSign}) => {
 
   const login = async () => {
     setIsLoading(true);
-    const schema = gql`
-      mutation generateCustomerTokenCustom(
-        $email: String!
-        $password: String!
-      ) {
-        generateCustomerTokenCustom(username: $email, password: $password) {
-          token
-        }
-      }
-    `;
 
     const params = {
       email: username,
       password: password,
     };
 
-    mutate(schema, params)
+    mutate(getCustomerToken, params)
       .then((res) => {
         const {data} = res;
         let user = data.generateCustomerTokenCustom;
-        console.log(user.token);
-        setData('userToken', user.token);
+        setData('auth', user.token);
         setIsLoading(false);
         let dataFormat = {
           type: 'signin',
           token: user.token,
         };
         setSign(dataFormat);
-        if (user.token !== null) {
-          navigation.navigate('ProfilePage');
-        }
       })
       .catch((err) => {
         setIsLoading(false);
         console.log(err);
-        alert('username/password salah cuy');
+        Alert.alert('username/password salah cuy');
       });
   };
 
   const cekToken = () => {
-    alert(JSON.stringify(getData('userToken')));
-    console.log(JSON.stringify(getData('userToken')));
+    Alert.alert(JSON.stringify(getData('userToken')));
   };
 
   return (
