@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {getProductByKey} from '../../services/query';
 import {query} from '../../services/api';
 import {Text, View, Image} from 'react-native';
@@ -19,9 +19,11 @@ const PDP = ({route, navigation}) => {
     url_key: route.params.key,
   };
 
-  query(getProductByKey, params).then((res) => {
-    setProduct(res.data.products.items[0]);
-    setIsLoading(false);
+  useEffect(() => {
+    query(getProductByKey, params).then((res) => {
+      setProduct(res.data.products.items[0]);
+      setIsLoading(false);
+    });
   });
 
   navigation.setOptions({title: product.name});

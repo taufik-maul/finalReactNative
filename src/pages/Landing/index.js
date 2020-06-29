@@ -10,7 +10,6 @@ import {
 import {connect} from 'react-redux';
 
 const Landing = ({navigation, auth}) => {
-  console.log(auth);
   if (auth.user !== null) {
     navigation.navigate('Home');
   }

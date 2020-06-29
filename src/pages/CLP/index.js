@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Text, View} from 'react-native';
 import {query} from '../../services/api';
 import {getCategoryList} from '../../services/query';
@@ -13,11 +13,15 @@ const CLP = ({navigation}) => {
   const [categoryList, setCategoryList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  query(getCategoryList).then((res) => {
-    console.log(res);
-    setCategoryList(res.data.categoryList[0].children);
-    setIsLoading(false);
-  });
+  useEffect(() => {
+    if (categoryList.length == 0) {
+      query(getCategoryList).then((res) => {
+        console.log(res);
+        setCategoryList(res.data.categoryList[0].children);
+        setIsLoading(false);
+      });
+    }
+  }, [categoryList]);
 
   const StackCLP = createStackNavigator();
 

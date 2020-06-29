@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {getCategoryByKey} from '../../services/query';
 import {query} from '../../services/api';
 import {FlatList, TouchableOpacity} from 'react-native-gesture-handler';
+import Price from '../../components/Price';
 
 const {Text, Image, View} = require('react-native');
 
@@ -15,22 +16,19 @@ const PLP = ({route, navigation}) => {
     url_key: route.params.key,
   };
 
-  query(getCategoryByKey, params).then((res) => {
-    setCategory(res.data.categoryList[0]);
-    setIsLoading(false);
+  useEffect(() => {
+    query(getCategoryByKey, params).then((res) => {
+      setCategory(res.data.categoryList[0]);
+      setIsLoading(false);
+    });
   });
+
   navigation.setOptions({title: category.name});
 
   const Product = ({data}) => {
     const product = data.item;
     return (
-      <TouchableOpacity
-        style={{padding: 10, width: '100%'}}
-        onPress={() =>
-          navigation.navigate('ProductPage', {
-            key: product.url_key,
-          })
-        }>
+      <View style={{flex: 1}}>
         <Image
           style={{width: '100%', height: 150, backgroundColor: '#777'}}
           source={{uri: product.small_image.url}}
@@ -39,7 +37,25 @@ const PLP = ({route, navigation}) => {
         <View style={{padding: 5}}>
           <Text>{product.name}</Text>
         </View>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={{padding: 10, width: '100%'}}
+          onPress={() =>
+            navigation.navigate('ProductPage', {
+              key: product.url_key,
+            })
+          }>
+          <Text
+            style={{
+              textAlign: 'center',
+              backgroundColor: 'tomato',
+              borderRadius: 8,
+              padding: 10,
+              color: '#FFF',
+            }}>
+            Detail
+          </Text>
+        </TouchableOpacity>
+      </View>
     );
   };
 
